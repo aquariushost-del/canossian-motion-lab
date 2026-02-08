@@ -1,0 +1,2217 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Canossian Motion Lab — Journal (Stage 1–2)</title>
+  <style>
+    :root{
+      /* SACSS palette (as per your preference) */
+      --navy:#0B1F3B;
+      --gold:#C9A227;
+      --bg:#F9FAFB;
+      --card:#FFFFFF;
+      --ink:#111827;
+      --muted:#6B7280;
+      --line:#E5E7EB;
+
+      --good:#16a34a;
+      --bad:#dc2626;
+
+      --shadow: 0 8px 24px rgba(17,24,39,0.08);
+      --radius: 14px;
+    }
+
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      font-size: 16px;
+    }
+
+    /* Top bar */
+    header{
+      background: var(--navy);
+      color:#fff;
+      padding: 14px 16px 10px;
+      border-bottom: 3px solid var(--gold);
+    }
+    .topRow{
+      max-width: 1100px;
+      margin: 0 auto;
+      display:flex;
+      align-items:baseline;
+      gap:12px;
+      justify-content:space-between;
+    }
+    .brand{
+      display:flex;
+      flex-direction:column;
+      gap:2px;
+    }
+    .brand h1{
+      margin:0;
+      font-size: 20px;
+      letter-spacing: 0.2px;
+    }
+    .brand .sub{
+      font-size: 13px;
+      opacity: 0.9;
+    }
+    .school{
+      font-size: 13px;
+      opacity: 0.9;
+      text-align:right;
+      line-height: 1.2;
+    }
+
+    /* Layout */
+    .wrap{
+      max-width: 1100px;
+      margin: 16px auto;
+      padding: 0 16px 18px;
+      display:grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 16px;
+    }
+
+    .panel{
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 14px;
+    }
+
+    .journalTitle{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      margin-bottom: 8px;
+    }
+    .journalTitle h2{
+      margin:0;
+      font-size: 17px;
+      color: var(--navy);
+    }
+    .progress{
+      display:flex;
+      gap:6px;
+      align-items:center;
+    }
+    .dot{
+      width:10px;height:10px;border-radius:999px;
+      border: 2px solid rgba(11,31,59,0.35);
+      background: transparent;
+    }
+    .dot.active{border-color: var(--gold)}
+    .dot.done{background: var(--gold); border-color: var(--gold);}
+
+    /* Score display */
+    .scoreBar{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      padding: 6px 10px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: #fff;
+      box-shadow: 0 6px 14px rgba(17,24,39,0.06);
+    }
+    .scoreItem{
+      display:flex;
+      align-items:baseline;
+      gap:6px;
+    }
+    .scoreLabel{
+      font-size: 12px;
+      font-weight: 800;
+      color: var(--navy);
+      opacity: 0.85;
+    }
+    .scoreIcon{
+      font-size: 16px;
+      line-height: 1;
+      margin-right: 2px;
+      transform: translateY(-1px);
+    }
+    .scoreValue{
+      font-size: 14px;
+      font-weight: 900;
+      color: var(--navy);
+    }
+    .scoreValue.stars{
+      color: var(--gold);
+    }
+    .scoreDivider{
+      width:1px;
+      height:18px;
+      background: var(--line);
+    }
+
+    /* Animation helpers */
+    @keyframes popStar {
+      0%   { transform: scale(1);   filter:none; }
+      40%  { transform: scale(1.18); filter: drop-shadow(0 8px 12px rgba(201,162,39,0.35)); }
+      100% { transform: scale(1);   filter:none; }
+    }
+    @keyframes softPulse {
+      0%   { transform: scale(1); }
+      50%  { transform: scale(1.08); }
+      100% { transform: scale(1); }
+    }
+    .popStar{
+      animation: popStar 320ms ease-out;
+    }
+    .pulse{
+      animation: softPulse 260ms ease-out;
+    }
+
+    .prompt{
+      margin: 8px 0 10px;
+      color: var(--ink);
+      font-size: 14px;
+      line-height: 1.45;
+    }
+
+    /* Graph card */
+    .graphCard{
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 10px;
+      background: #fff;
+    }
+    .graphLabel{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      margin-bottom: 6px;
+    }
+    .graphLabel .qtag{
+      font-weight: 800;
+      font-size: 13px;
+      color: var(--navy);
+    }
+    .graphLabel .axes{
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    /* Drop zone */
+    .dropZone{
+      margin-top: 10px;
+      border: 2px dashed #cbd5e1;
+      border-radius: 12px;
+      padding: 12px;
+      min-height: 58px;
+      background: #fafafa;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      text-align:center;
+      color: var(--muted);
+      font-size: 13px;
+      transition: 120ms ease;
+      position: relative;
+    }
+    .dropZone.over{border-color:#64748b;background:#f1f5f9;}
+    .dropZone.correct{border-color: var(--good); background: #ecfdf3; color: #0f6f3a;}
+    .dropZone.wrong{border-color: var(--bad); background: #fef2f2; color: #7f1d1d;}
+    .dropZone.correct::after{
+      content: "✓";
+      position: absolute;
+      top: 6px;
+      right: 8px;
+      width: 22px;
+      height: 22px;
+      border-radius: 999px;
+      background: var(--good);
+      color: #fff;
+      font-weight: 900;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 6px 12px rgba(22,163,74,0.25);
+    }
+
+    /* Cards bank */
+    .bankTitle{
+      margin:0 0 8px 0;
+      font-weight: 800;
+      font-size: 14px;
+      color: var(--navy);
+    }
+    .cards{
+      display:flex;
+      flex-direction:column;
+      gap: 10px;
+    }
+    .card{
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 10px 12px;
+      background: #fff;
+      cursor: grab;
+      user-select: none;
+      font-size: 14px;
+      line-height: 1.25;
+      transition: 120ms ease;
+    }
+    .cards.graphOptions{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .card.graphOption{
+      padding: 8px;
+    }
+    .graphLabelSmall{
+      font-weight: 800;
+      font-size: 12px;
+      color: var(--navy);
+      margin-bottom: 6px;
+    }
+    .card.graphOption svg{
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    /* Section match grid (Stage 3) */
+    .sectionGrid{
+      display:grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap:10px;
+      margin-top:12px;
+    }
+    .sectionCol{
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+    }
+    .sectionLabel{
+      font-size: 12px;
+      font-weight: 800;
+      color: var(--navy);
+    }
+    .sectionDrop{
+      border:2px dashed #cbd5e1;
+      border-radius:12px;
+      padding:10px;
+      min-height:58px;
+      background:#fafafa;
+      text-align:center;
+      color:#6B7280;
+      position:relative;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      transition: 120ms ease;
+    }
+    .sectionDrop.over{border-color:#64748b;background:#f1f5f9;}
+    .sectionDrop.correct{border-color: var(--good); background:#ecfdf3; color:#0f6f3a;}
+    .sectionDrop.wrong{border-color: var(--bad); background:#fef2f2; color:#7f1d1d;}
+    .card:hover{
+      border-color: rgba(201,162,39,0.7);
+      box-shadow: 0 10px 20px rgba(17,24,39,0.06);
+    }
+    .card:active{cursor: grabbing;}
+    .card.dragging{opacity: 0.55;}
+    .card small{
+      display:block;
+      margin-top: 2px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    /* Controls */
+    .controls{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+      margin-top: 10px;
+    }
+    button{
+      border: 1px solid var(--line);
+      background: #fff;
+      border-radius: 12px;
+      padding: 9px 12px;
+      font-weight: 800;
+      cursor: pointer;
+      color: var(--navy);
+      font-size: 14px;
+    }
+    button.primary{
+      background: var(--navy);
+      color: #fff;
+      border-color: var(--navy);
+    }
+    button.ghost{
+      background: transparent;
+    }
+    button:disabled{
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    .status{
+      margin-left:auto;
+      font-size: 13px;
+      color: var(--muted);
+      font-weight: 800;
+    }
+
+    /* Hint + feedback */
+    .hintBox{
+      margin-top: 10px;
+      border: 1px solid rgba(201,162,39,0.45);
+      background: #fffaf0;
+      border-radius: 12px;
+      padding: 10px 12px;
+      font-size: 13px;
+      color: #5b4500;
+      display:none;
+      line-height: 1.4;
+    }
+    .feedback{
+      margin-top: 10px;
+      font-size: 13px;
+      line-height: 1.4;
+      color: var(--muted);
+      display:none;
+    }
+    .feedback strong{color: var(--navy);}
+
+    /* Reflection (after check) */
+    .reflection{
+      margin-top: 10px;
+      padding: 10px 12px;
+      border-radius: 12px;
+      background: #f3f4f6;
+      border: 1px solid var(--line);
+      color: var(--ink);
+      font-size: 13px;
+      display:none;
+      line-height: 1.45;
+    }
+
+    /* Reduce graph size (single graph) */
+    .graphCard svg{
+      width: 50%;
+      height: auto;
+      display: block;
+    }
+    .graphCard .compareGraphs svg{
+      width: 100%;
+    }
+
+    /* Mobile */
+    @media (max-width: 900px){
+      .wrap{grid-template-columns: 1fr;}
+      .status{margin-left: 0; width:100%;}
+      .school{text-align:left;}
+    }
+
+    /* Accessibility focus */
+    .card:focus, button:focus{
+      outline: 3px solid rgba(201,162,39,0.55);
+      outline-offset: 2px;
+    }
+
+    /* Footer */
+    .siteFooter{
+      max-width: 1100px;
+      margin: 6px auto 14px;
+      padding: 0 16px;
+      color: var(--muted);
+      font-size: 12px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+<header>
+  <div class="topRow">
+    <div class="brand">
+      <h1>Canossian Motion Lab</h1>
+      <div class="sub">A Science Journal on Interpreting Motion</div>
+    </div>
+    <div class="school">
+      St Anthony’s Canossian Secondary School<br/>
+      Physics — Kinematics
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <!-- LEFT: Journal workspace -->
+  <section class="panel">
+    <div class="journalTitle">
+      <h2 id="stageTitle">Stage 1 — Distance–Time Graphs</h2>
+      <div class="scoreBar" aria-label="Journal score">
+        <div class="scoreItem">
+          <span class="scoreIcon" aria-hidden="true">⭐</span>
+          <span class="scoreLabel">Stars</span>
+          <span class="scoreValue stars" id="starsCount">0</span>
+        </div>
+        <div class="scoreDivider"></div>
+        <div class="scoreItem">
+          <span class="scoreIcon" aria-hidden="true">🔥</span>
+          <span class="scoreLabel">Streak</span>
+          <span class="scoreValue" id="streakCount">0</span>
+        </div>
+      </div>
+      <button id="soundToggle" class="ghost">🔊</button>
+      <div class="progress" id="progressDots" aria-label="Progress"></div>
+    </div>
+
+    <div class="prompt" id="promptText"></div>
+
+    <div class="graphCard">
+      <div class="graphLabel">
+        <div class="qtag" id="qTag">Question 1</div>
+        <div class="axes" id="axesLabel">Distance–Time graph</div>
+      </div>
+
+      <!-- Graph area (SVG changes per question) -->
+      <div id="graphArea"></div>
+
+      <!-- Drop zone -->
+      <div class="dropZone" id="dropZone" data-accept="">
+        Drag a description card here
+      </div>
+
+      <!-- Section match grid (Stage 3) -->
+      <div class="sectionGrid" id="sectionGrid" style="display:none;">
+        <div class="sectionCol">
+          <div class="sectionLabel">Section A</div>
+          <div class="sectionDrop" data-section="A">Drop here</div>
+        </div>
+        <div class="sectionCol">
+          <div class="sectionLabel">Section B</div>
+          <div class="sectionDrop" data-section="B">Drop here</div>
+        </div>
+        <div class="sectionCol">
+          <div class="sectionLabel">Section C</div>
+          <div class="sectionDrop" data-section="C">Drop here</div>
+        </div>
+        <div class="sectionCol">
+          <div class="sectionLabel">Section D</div>
+          <div class="sectionDrop" data-section="D">Drop here</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="hintBox" id="hintBox">
+      <strong>Hint:</strong> What does the gradient of a distance–time graph tell you about the speed?
+    </div>
+
+    <div class="feedback" id="feedback"></div>
+
+    <div class="reflection" id="reflection">
+      <strong>Reflection:</strong> Which part of the graph helped you decide?
+    </div>
+
+    <div class="controls">
+      <button class="primary" id="checkBtn">Submit Answer</button>
+      <button class="ghost" id="hintBtn">Show hint</button>
+      <button class="ghost" id="resetBtn">Reset</button>
+      <button class="ghost" id="clearAllBtn" style="display:none;">Clear All</button>
+      <button class="primary" id="nextBtn" disabled>Next →</button>
+      <div class="status" id="statusText">Progress: 0 / 6</div>
+    </div>
+  </section>
+
+  <!-- RIGHT: Description bank -->
+  <aside class="panel">
+    <p class="bankTitle" id="bankTitle">Description cards</p>
+    <div class="cards" id="cardBank" aria-label="Description cards bank">
+      <div class="card" draggable="true" data-id="constant_speed" tabindex="0">
+        constant speed
+      </div>
+      <div class="card" draggable="true" data-id="decreasing_speed" tabindex="0">
+        decreasing speed
+      </div>
+      <div class="card" draggable="true" data-id="increasing_speed" tabindex="0">
+        increasing speed
+      </div>
+      <div class="card" draggable="true" data-id="stationary" tabindex="0">
+        stationary
+      </div>
+    </div>
+
+    <div id="bankTip" style="margin-top:12px;color:var(--muted);font-size:13px;line-height:1.45;">
+      Tip: If you change your mind, tap/click the placed card to return it to the bank.
+    </div>
+  </aside>
+</main>
+
+<footer class="siteFooter">
+  St Anthony’s Canossian Secondary School — All rights reserved.
+</footer>
+
+<script>
+/* ==========================================================
+   Canossian Motion Lab (Stage 1–2)
+   - Stage 1: Distance–Time graphs (Q1–Q6)
+   - Stage 2: Speed–Time graphs (Q1–Q8)
+   Interaction:
+     - Drag a card into the drop zone
+     - Click Check
+     - Next enabled only when correct
+   ========================================================== */
+
+const cardBank = document.getElementById("cardBank");
+const bankTitleEl = document.getElementById("bankTitle");
+const cards = Array.from(document.querySelectorAll(".card"));
+const dropZone = document.getElementById("dropZone");
+const sectionGrid = document.getElementById("sectionGrid");
+const sectionDrops = Array.from(document.querySelectorAll(".sectionDrop"));
+const graphArea = document.getElementById("graphArea");
+const promptText = document.getElementById("promptText");
+const stageTitle = document.getElementById("stageTitle");
+const qTag = document.getElementById("qTag");
+const axesLabel = document.getElementById("axesLabel");
+const hintBox = document.getElementById("hintBox");
+const hintBtn = document.getElementById("hintBtn");
+const feedback = document.getElementById("feedback");
+const reflection = document.getElementById("reflection");
+const checkBtn = document.getElementById("checkBtn");
+const resetBtn = document.getElementById("resetBtn");
+const clearAllBtn = document.getElementById("clearAllBtn");
+const nextBtn = document.getElementById("nextBtn");
+const statusText = document.getElementById("statusText");
+const bankTip = document.getElementById("bankTip");
+const soundToggle = document.getElementById("soundToggle");
+
+const soundCorrect = new Audio("sounds/correct.mp3");
+const soundWrong   = new Audio("sounds/wrong.mp3");
+const soundComplete = new Audio("sounds/complete.mp3");
+soundCorrect.preload = "auto";
+soundWrong.preload = "auto";
+soundComplete.preload = "auto";
+let soundEnabled = true;
+
+soundToggle.addEventListener("click", () => {
+  soundEnabled = !soundEnabled;
+  soundToggle.textContent = soundEnabled ? "🔊" : "🔇";
+});
+const starsCountEl = document.getElementById("starsCount");
+const streakCountEl = document.getElementById("streakCount");
+
+const progressDotsEl = document.getElementById("progressDots");
+
+/* --------- Stage 1: Distance–Time (Q1–Q6) ---------
+   IMPORTANT: The graphs are SVG so you can run everything offline.
+   You can later replace SVGs with images if you prefer.
+*/
+const STAGE1_QUESTIONS = [
+  {
+    id: 1,
+    tag: "Question 1",
+    prompt: `
+      <strong>Study the distance–time graph below.</strong><br/>
+      Which description best matches the motion?
+    `,
+    accept: "stationary",
+    hint: "What does the gradient of a distance–time graph tell you about the speed?",
+    // Horizontal line (distance constant)
+    graphHtml: distanceTimeGraph({
+      title: "Object A",
+      pathType: "horizontal",
+      lineY: 70
+    })
+  },
+  {
+    id: 2,
+    tag: "Question 2",
+    prompt: `
+      <strong>Study the distance–time graph below.</strong><br/>
+      Which description best matches the motion?
+    `,
+    accept: "increasing_speed",
+    hint: "Is the gradient staying the same, or becoming steeper with time?",
+    // Curve getting steeper (speed increasing)
+    graphHtml: distanceTimeGraph({
+      title: "Object B",
+      pathType: "curve_steeper"
+    })
+  },
+  {
+    id: 3,
+    tag: "Question 3",
+    prompt: `
+      <strong>Two objects move over the same period of time.</strong><br/>
+      Compare their distance–time graphs.<br/>
+      Which object is moving at a higher speed?
+      <div style="margin-top:6px;color:#6B7280;font-size:13px;">
+        (Choose <em>Object A</em> or <em>Object B</em>.)
+      </div>
+    `,
+    accept: "object_b_faster",
+    hint: "Which graph has the steeper gradient?",
+    // Two graphs side-by-side, B is steeper so faster
+    graphHtml: compareDistanceTimeGraphs()
+  },
+  {
+    id: 4,
+    tag: "Question 4",
+    prompt: `
+      <strong>Study the distance–time graph below.</strong><br/>
+      Which description best matches the motion?
+    `,
+    accept: "decreasing_speed",
+    hint: "Does the gradient become less steep with time?",
+    // Curve getting less steep (speed decreasing)
+    graphHtml: distanceTimeGraph({
+      title: "Object C",
+      pathType: "curve_less_steep"
+    })
+  },
+  {
+    id: 5,
+    tag: "Question 5",
+    prompt: `
+      <strong>Study the distance–time graph below.</strong><br/>
+      Which description best matches the motion?
+    `,
+    accept: "constant_speed",
+    hint: "Is the gradient constant throughout?",
+    // Straight line (constant speed)
+    graphHtml: distanceTimeGraph({
+      title: "Object D",
+      pathType: "straight_constant"
+    })
+  },
+  {
+    id: 6,
+    tag: "Question 6",
+    prompt: `
+      <strong>A car is travelling at a constant speed.</strong><br/>
+      After some time, it speeds up.<br/>
+      Which distance–time graph best represents this motion?
+    `,
+    accept: "graph_d_correct",
+    hint: "What does the gradient of a distance–time graph tell you about speed?",
+    // Options shown as draggable graph cards in the bank
+    graphHtml: `
+      <div style="color:var(--muted);font-size:13px;">
+        Drag the correct graph (A–D) into the answer box.
+      </div>
+    `
+  }
+];
+
+/* --------- Stage 2: Speed–Time (Q1–Q8) --------- */
+const STAGE2_QUESTIONS = [
+  {
+    id: 1,
+    tag: "Question 1",
+    prompt: `
+      <strong>The gradient of a speed–time graph represents acceleration.</strong><br/>
+      Study the speed–time graph below.<br/>
+      Which description best matches the motion?
+    `,
+    accept: "constant_speed",
+    hint: "What does a horizontal line mean on a speed–time graph?",
+    feedbackCorrect: "Horizontal line: speed is constant, so acceleration is zero.",
+    feedbackIncorrect: "Check whether the speed changes. A flat line means constant speed.",
+    graphHtml: speedTimeGraph({
+      title: "Object A",
+      type: "constant_speed"
+    })
+  },
+  {
+    id: 2,
+    tag: "Question 2",
+    prompt: `
+      <strong>The gradient of a speed–time graph represents acceleration.</strong><br/>
+      Study the speed–time graph below.<br/>
+      Which description best matches the motion?
+    `,
+    accept: "constant_acceleration",
+    hint: "Is the gradient constant?",
+    feedbackCorrect: "Straight upward line: constant positive gradient → constant acceleration.",
+    feedbackIncorrect: "A constant gradient means constant acceleration.",
+    graphHtml: speedTimeGraph({
+      title: "Object B",
+      type: "constant_acceleration"
+    })
+  },
+  {
+    id: 3,
+    tag: "Question 3",
+    prompt: `
+      <strong>The gradient of a speed–time graph represents acceleration.</strong><br/>
+      Study the speed–time graph below.<br/>
+      Which description best matches the motion?
+    `,
+    accept: "constant_deceleration",
+    hint: "Is the gradient negative and constant?",
+    feedbackCorrect: "Straight downward line: constant negative gradient → constant deceleration.",
+    feedbackIncorrect: "A straight downward line shows constant deceleration.",
+    graphHtml: speedTimeGraph({
+      title: "Object C",
+      type: "constant_deceleration"
+    })
+  },
+  {
+    id: 4,
+    tag: "Question 4",
+    prompt: `
+      <strong>The gradient of a speed–time graph represents acceleration.</strong><br/>
+      Study the speed–time graph below.<br/>
+      Which description best matches the motion?
+    `,
+    accept: "increasing_acceleration",
+    hint: "Does the gradient get steeper with time?",
+    feedbackCorrect: "Curve gets steeper: gradient increases → increasing acceleration.",
+    feedbackIncorrect: "If the slope increases, acceleration is increasing.",
+    graphHtml: speedTimeGraph({
+      title: "Object D",
+      type: "increasing_acceleration"
+    })
+  },
+  {
+    id: 5,
+    tag: "Question 5",
+    prompt: `
+      <strong>The gradient of a speed–time graph represents acceleration.</strong><br/>
+      Study the speed–time graph below.<br/>
+      Which description best matches the motion?
+    `,
+    accept: "decreasing_acceleration",
+    hint: "Is it still speeding up, but by smaller amounts each second?",
+    feedbackCorrect: "Curve flattens while rising: gradient decreases → decreasing acceleration.",
+    feedbackIncorrect: "If the slope is positive but getting smaller, acceleration is decreasing.",
+    graphHtml: speedTimeGraph({
+      title: "Object E",
+      type: "decreasing_acceleration"
+    })
+  },
+  {
+    id: 6,
+    tag: "Question 6",
+    prompt: `
+      <strong>The gradient of a speed–time graph represents acceleration.</strong><br/>
+      Study the speed–time graph below.<br/>
+      Which description best matches the motion?
+    `,
+    accept: "increasing_deceleration",
+    hint: "Is the downward slope getting steeper?",
+    feedbackCorrect: "Downward slope gets steeper: magnitude of negative gradient increases → increasing deceleration.",
+    feedbackIncorrect: "If the line slopes down more steeply, deceleration is increasing.",
+    graphHtml: speedTimeGraph({
+      title: "Object F",
+      type: "increasing_deceleration"
+    })
+  },
+  {
+    id: 7,
+    tag: "Question 7",
+    prompt: `
+      <strong>The gradient of a speed–time graph represents acceleration.</strong><br/>
+      Calculate the distance travelled from the speed–time graph.
+    `,
+    accept: "20m",
+    hint: "Distance travelled is the area under the speed–time graph.",
+    feedbackCorrect: "Distance = area under graph. Triangle area gives the distance.",
+    feedbackIncorrect: "Use area under the graph (triangle).",
+    graphHtml: speedTimeGraph({
+      title: "Object G",
+      type: "area_triangle",
+      showTicks: true,
+      xMax: 4,
+      yMax: 10,
+      xTicks: [0,1,2,3,4],
+      yTicks: [0,5,10]
+    })
+  },
+  {
+    id: 8,
+    tag: "Question 8",
+    prompt: `
+      <strong>The gradient of a speed–time graph represents acceleration.</strong><br/>
+      Calculate the distance travelled from the speed–time graph.
+    `,
+    accept: "54m",
+    hint: "Split the area into simple shapes.",
+    feedbackCorrect: "Distance = total area under graph (rectangle + triangle).",
+    feedbackIncorrect: "Break the area into a rectangle and a triangle.",
+    graphHtml: speedTimeGraph({
+      title: "Object H",
+      type: "area_trapezium",
+      showTicks: true,
+      xMax: 6,
+      yMax: 12,
+      xTicks: [0,1,2,3,4,5,6],
+      yTicks: [0,6,12]
+    })
+  }
+];
+
+/* --------- Stage 3: Section Match (A–D) --------- */
+const STAGE3_QUESTIONS = [
+  {
+    id: 1,
+    tag: "Question 1",
+    layout: "sectionMatch",
+    prompt: `
+      <strong>Study the distance–time graph.</strong><br/>
+      The journey has four sections (A–D). Match the correct description to <em>each</em> section.
+    `,
+    hint: "On a distance–time graph: gradient = speed.",
+    feedbackCorrect: "All sections matched correctly.",
+    feedbackIncorrect: "Check the gradient (speed) in each section.",
+    acceptMap: {
+      A: "stationary",
+      B: "constant_speed",
+      C: "increasing_speed",
+      D: "decreasing_speed"
+    },
+    options: [
+      { id: "stationary", label: "stationary" },
+      { id: "constant_speed", label: "constant speed" },
+      { id: "increasing_speed", label: "increasing speed" },
+      { id: "decreasing_speed", label: "decreasing speed" }
+    ],
+    graphHtml: sectionMatchGraphDT1()
+  },
+  {
+    id: 2,
+    tag: "Question 2",
+    layout: "sectionMatch",
+    prompt: `
+      <strong>Study the speed–time graph.</strong><br/>
+      The journey has four sections (A–D). Match the correct description to <em>each</em> section.
+    `,
+    hint: "On a speed–time graph: gradient = acceleration.",
+    feedbackCorrect: "All sections matched correctly.",
+    feedbackIncorrect: "Check whether the gradient is positive, zero, or negative in each section.",
+    acceptMap: {
+      A: "st_constant_accel",
+      B: "st_constant_speed",
+      C: "st_decreasing_accel",
+      D: "st_constant_decel"
+    },
+    hideHelperText: true,
+    options: [
+      { id: "st_constant_accel", label: "constant acceleration" },
+      { id: "st_constant_decel", label: "constant deceleration" },
+      { id: "st_constant_speed", label: "constant speed" },
+      { id: "st_decreasing_accel", label: "decreasing acceleration" }
+    ],
+    graphHtml: sectionMatchGraphST2()
+  },
+  {
+    id: 3,
+    tag: "Question 3",
+    layout: "sectionMatch",
+    prompt: `
+      <strong>A cyclist’s motion is shown on the speed–time graph in four sections (A–D).</strong><br/>
+      Match the description to <em>each</em> section.
+    `,
+    hint: "Look at whether speed is increasing, constant, decreasing, or zero.",
+    feedbackCorrect: "All sections matched correctly.",
+    feedbackIncorrect: "Check whether the speed rises, stays flat, falls, or is zero in each section.",
+    acceptMap: {
+      A: "story_accel_from_rest",
+      B: "story_constant_speed",
+      C: "story_decelerating",
+      D: "story_stationary"
+    },
+    hideHelperText: true,
+    options: [
+      { id: "story_accel_from_rest", label: "constant acceleration" },
+      { id: "story_constant_speed", label: "constant speed" },
+      { id: "story_decelerating", label: "constant deceleration" },
+      { id: "story_stationary", label: "stationary" }
+    ],
+    graphHtml: sectionMatchGraphST3()
+  }
+];
+
+const STAGES = {
+  stage1: {
+    id: 1,
+    title: "Stage 1 — Distance–Time Graphs",
+    total: STAGE1_QUESTIONS.length,
+    key: "cml_stage1_dt_state",
+    questions: STAGE1_QUESTIONS
+  },
+  stage2: {
+    id: 2,
+    title: "Stage 2 — Speed–Time Graphs",
+    total: STAGE2_QUESTIONS.length,
+    key: "cml_stage2_st_state",
+    questions: STAGE2_QUESTIONS
+  },
+  stage3: {
+    id: 3,
+    title: "Stage 3 — Section Match",
+    total: STAGE3_QUESTIONS.length,
+    key: "cml_stage3_state",
+    questions: STAGE3_QUESTIONS
+  }
+};
+
+let currentStage = STAGES.stage1;
+let currentQuestions = currentStage.questions;
+let currentIndex = 0;
+let completed = 0; // number correct so far
+let lastCheckWasCorrect = false;
+
+/* ---------- Drag & drop wiring ---------- */
+cards.forEach(card => {
+  card.addEventListener("dragstart", (e) => {
+    card.classList.add("dragging");
+    e.dataTransfer.setData("text/plain", card.dataset.id);
+    e.dataTransfer.effectAllowed = "move";
+  });
+  card.addEventListener("dragend", () => {
+    card.classList.remove("dragging");
+  });
+});
+
+dropZone.addEventListener("dragover", (e) => {
+  e.preventDefault();
+  dropZone.classList.add("over");
+});
+dropZone.addEventListener("dragleave", () => dropZone.classList.remove("over"));
+dropZone.addEventListener("drop", (e) => {
+  e.preventDefault();
+  dropZone.classList.remove("over");
+
+  const id = e.dataTransfer.getData("text/plain");
+  const card = document.querySelector(`.card[data-id="${cssEscape(id)}"]`);
+  if (!card) return;
+
+  placeCardIntoZone(card);
+});
+
+dropZone.addEventListener("click", () => {
+  // Return card to bank if one is placed
+  const c = dropZone.querySelector(".card");
+  if (!c) return;
+  cardBank.appendChild(c);
+  setZonePlaceholder();
+  clearCheckState();
+});
+
+/* ---------- Buttons ---------- */
+hintBtn.addEventListener("click", () => {
+  hintBox.style.display = (hintBox.style.display === "none" || hintBox.style.display === "") ? "block" : "none";
+});
+
+resetBtn.addEventListener("click", () => {
+  resetCurrentQuestion();
+});
+
+clearAllBtn.addEventListener("click", () => {
+  clearSectionMatch();
+});
+
+checkBtn.addEventListener("click", () => {
+  checkAnswer();
+});
+
+nextBtn.addEventListener("click", () => {
+  goNext();
+});
+
+/* ---------- Init ---------- */
+loadStage(STAGES.stage1);
+
+/* ==========================================================
+   Functions
+   ========================================================== */
+
+function loadStage(stage){
+  currentStage = stage;
+  currentQuestions = stage.questions;
+  stageTitle.textContent = stage.title;
+  renderDots(stage.total);
+  loadQuestion(0);
+}
+
+function renderDots(count){
+  progressDotsEl.innerHTML = "";
+  for (let i = 0; i < count; i++){
+    const dot = document.createElement("div");
+    dot.className = "dot";
+    if (i === 0) dot.classList.add("active");
+    dot.title = `Question ${i + 1}`;
+    progressDotsEl.appendChild(dot);
+  }
+}
+
+function loadQuestion(index){
+  currentIndex = index;
+  lastCheckWasCorrect = false;
+
+  const q = currentQuestions[currentIndex];
+
+  // Update UI text
+  qTag.textContent = q.tag;
+  promptText.innerHTML = q.prompt;
+  axesLabel.textContent = (currentStage.id === 1) ? "Distance–Time graph" : "Speed–Time graph";
+  hintBox.innerHTML = `<strong>Hint:</strong> ${escapeHtml(q.hint)}`;
+  hintBox.style.display = "none";
+  feedback.style.display = "none";
+  reflection.style.display = "none";
+
+  // Put correct accept key into drop zone (single-answer)
+  dropZone.dataset.accept = q.accept;
+
+  // Render graph(s)
+  graphArea.innerHTML = q.graphHtml;
+
+  // Reset zone contents and configure per layout
+  if (q.layout === "sectionMatch"){
+    dropZone.style.display = "none";
+    sectionGrid.style.display = "grid";
+    clearAllBtn.style.display = "inline-flex";
+    toggleHelperText(q.hideHelperText === true);
+    resetDropZoneToBank();
+    resetSectionMatch();
+    configureSectionMatchBank(q);
+  } else {
+    dropZone.style.display = "";
+    sectionGrid.style.display = "none";
+    clearAllBtn.style.display = "none";
+    toggleHelperText(false);
+    resetDropZoneToBank();
+    setZonePlaceholder();
+    clearCheckState();
+    configureCardBankForQuestion(q.id);
+  }
+
+  // Update progress
+  updateDots();
+  updateStatusText();
+  updateScoreUI();
+  nextBtn.disabled = true;
+}
+
+function configureCardBankForQuestion(qid){
+  if (currentStage.id === 2){
+    // Stage 2: Speed–Time
+    if (qid === 7 || qid === 8){
+      bankTitleEl.textContent = "Answer options";
+      cardBank.classList.remove("graphOptions");
+      axesLabel.textContent = "Speed–Time graph (calculation)";
+      if (qid === 7){
+        cardBank.innerHTML = `
+          <div class="card" draggable="true" data-id="10m" tabindex="0">10 m</div>
+          <div class="card" draggable="true" data-id="20m" tabindex="0">20 m</div>
+          <div class="card" draggable="true" data-id="30m" tabindex="0">30 m</div>
+          <div class="card" draggable="true" data-id="40m" tabindex="0">40 m</div>
+        `;
+      } else {
+        cardBank.innerHTML = `
+          <div class="card" draggable="true" data-id="42m" tabindex="0">42 m</div>
+          <div class="card" draggable="true" data-id="48m" tabindex="0">48 m</div>
+          <div class="card" draggable="true" data-id="54m" tabindex="0">54 m</div>
+          <div class="card" draggable="true" data-id="60m" tabindex="0">60 m</div>
+        `;
+      }
+      rebindDragEvents();
+      return;
+    }
+
+    // Stage 2 interpretation cards (7 options)
+    bankTitleEl.textContent = "Description cards";
+    cardBank.classList.remove("graphOptions");
+    axesLabel.textContent = "Speed–Time graph";
+    cardBank.innerHTML = `
+      <div class="card" draggable="true" data-id="constant_acceleration" tabindex="0">
+        constant acceleration
+      </div>
+      <div class="card" draggable="true" data-id="constant_deceleration" tabindex="0">
+        constant deceleration
+      </div>
+      <div class="card" draggable="true" data-id="constant_speed" tabindex="0">
+        constant speed (zero acceleration)
+      </div>
+      <div class="card" draggable="true" data-id="decreasing_acceleration" tabindex="0">
+        decreasing acceleration
+      </div>
+      <div class="card" draggable="true" data-id="decreasing_deceleration" tabindex="0">
+        decreasing deceleration
+      </div>
+      <div class="card" draggable="true" data-id="increasing_acceleration" tabindex="0">
+        increasing acceleration
+      </div>
+      <div class="card" draggable="true" data-id="increasing_deceleration" tabindex="0">
+        increasing deceleration
+      </div>
+    `;
+    rebindDragEvents();
+    return;
+  }
+
+  // Q3: use only two "Object A / Object B" cards (comparison)
+  if (qid === 3){
+    bankTitleEl.textContent = "Graph options";
+    cardBank.classList.remove("graphOptions");
+    cardBank.innerHTML = `
+      <div class="card" draggable="true" data-id="object_a_faster" tabindex="0">
+        Object A
+      </div>
+      <div class="card" draggable="true" data-id="object_b_faster" tabindex="0">
+        Object B
+      </div>
+    `;
+    rebindDragEvents();
+    axesLabel.textContent = "Distance–Time graphs (comparison)";
+    dropZone.textContent = "Drag your choice here (Object A or Object B)";
+    return;
+  }
+
+  // Q6: graph options A–D (draggable)
+  if (qid === 6){
+    bankTitleEl.textContent = "Graph options";
+    cardBank.classList.add("graphOptions");
+    cardBank.innerHTML = `
+      <div class="card graphOption" draggable="true" data-id="graph_a" tabindex="0" aria-label="Graph A">
+        <div class="graphLabelSmall">Graph A</div>
+        ${graphOptionSVG("A")}
+      </div>
+      <div class="card graphOption" draggable="true" data-id="graph_b" tabindex="0" aria-label="Graph B">
+        <div class="graphLabelSmall">Graph B</div>
+        ${graphOptionSVG("B")}
+      </div>
+      <div class="card graphOption" draggable="true" data-id="graph_c" tabindex="0" aria-label="Graph C">
+        <div class="graphLabelSmall">Graph C</div>
+        ${graphOptionSVG("C")}
+      </div>
+      <div class="card graphOption" draggable="true" data-id="graph_d_correct" tabindex="0" aria-label="Graph D">
+        <div class="graphLabelSmall">Graph D</div>
+        ${graphOptionSVG("D")}
+      </div>
+    `;
+    rebindDragEvents();
+    return;
+  }
+
+  // All other non-comparison questions: 4 standard cards
+  bankTitleEl.textContent = "Description cards";
+  cardBank.classList.remove("graphOptions");
+  cardBank.innerHTML = `
+    <div class="card" draggable="true" data-id="constant_speed" tabindex="0">
+      constant speed
+    </div>
+    <div class="card" draggable="true" data-id="decreasing_speed" tabindex="0">
+      decreasing speed
+    </div>
+    <div class="card" draggable="true" data-id="increasing_speed" tabindex="0">
+      increasing speed
+    </div>
+    <div class="card" draggable="true" data-id="stationary" tabindex="0">
+      stationary
+    </div>
+  `;
+  rebindDragEvents();
+}
+
+function rebindDragEvents(){
+  const newCards = Array.from(cardBank.querySelectorAll(".card"));
+  newCards.forEach(card => {
+    card.addEventListener("dragstart", (e) => {
+      card.classList.add("dragging");
+      e.dataTransfer.setData("text/plain", card.dataset.id);
+      e.dataTransfer.effectAllowed = "move";
+    });
+    card.addEventListener("dragend", () => card.classList.remove("dragging"));
+  });
+}
+
+function placeCardIntoZone(card){
+  // If zone already has a card, return it to bank
+  const existing = dropZone.querySelector(".card");
+  if (existing) cardBank.appendChild(existing);
+
+  // Clear placeholder text
+  dropZone.textContent = "";
+  dropZone.appendChild(card);
+
+  clearCheckState();
+}
+
+function setZonePlaceholder(){
+  // Show placeholder only if no card
+  if (!dropZone.querySelector(".card")){
+    if (currentStage.id === 1 && currentQuestions[currentIndex].id === 3){
+      dropZone.textContent = "Drag your choice here (Object A or Object B)";
+    } else if (currentStage.id === 1 && currentQuestions[currentIndex].id === 6){
+      dropZone.textContent = "Drag a graph here (A–D)";
+    } else if (currentStage.id === 2 && (currentQuestions[currentIndex].id === 7 || currentQuestions[currentIndex].id === 8)){
+      dropZone.textContent = "Drag your answer here";
+    } else {
+      dropZone.textContent = "Drag a description card here";
+    }
+  }
+}
+
+function clearCheckState(){
+  dropZone.classList.remove("correct","wrong","over");
+  feedback.style.display = "none";
+  reflection.style.display = "none";
+  nextBtn.disabled = true;
+}
+
+function checkAnswer(){
+  const q = currentQuestions[currentIndex];
+  if (q.layout === "sectionMatch"){
+    checkAnswerSectionMatch(q);
+    return;
+  }
+  const placed = dropZone.querySelector(".card");
+
+  // If none placed
+  if (!placed){
+    dropZone.classList.remove("correct");
+    dropZone.classList.add("wrong");
+    showFeedback(false, "Place a card into the answer box first.");
+    nextBtn.disabled = true;
+    return;
+  }
+
+  const isCorrect = placed.dataset.id === q.accept;
+  lastCheckWasCorrect = isCorrect;
+
+  dropZone.classList.remove("correct","wrong");
+  dropZone.classList.add(isCorrect ? "correct" : "wrong");
+
+  if (isCorrect){
+    playSound(soundCorrect);
+    // Only count completion once per question
+    if (!isQuestionMarkedDone(currentIndex)){
+      markQuestionDone(currentIndex);
+      const score = scoreState();
+      score.stars += 1;
+      score.streak += 1;
+      if (score.streak === 3 && !score.bonusGiven["3"]){
+        score.stars += 1;
+        score.bonusGiven["3"] = true;
+      }
+      if (score.streak === 5 && !score.bonusGiven["5"]){
+        score.stars += 2;
+        score.bonusGiven["5"] = true;
+      }
+      saveScoreState(score);
+      updateScoreUI({popStars:true, pulseStreak:true});
+      completed = countDone();
+    }
+    const correctMsg = q.feedbackCorrect ?? feedbackTextForCorrect(q.id);
+    showFeedback(true, correctMsg);
+    reflection.style.display = "block";
+    nextBtn.disabled = false;
+  } else {
+    playSound(soundWrong);
+    const score = scoreState();
+    if (score.streak !== 0){
+      score.streak = 0;
+      saveScoreState(score);
+      updateScoreUI({pulseStreak:true});
+    }
+    const incorrectMsg = q.feedbackIncorrect ?? feedbackTextForIncorrect(q.id);
+    showFeedback(false, incorrectMsg);
+    nextBtn.disabled = true;
+  }
+
+  updateDots();
+  updateStatusText();
+}
+
+function showFeedback(correct, msg){
+  feedback.style.display = "block";
+  feedback.innerHTML = correct
+    ? `<strong>That fits the motion shown.</strong> ${escapeHtml(msg)}`
+    : `<strong>Let’s look again.</strong> ${escapeHtml(msg)}`;
+}
+
+function feedbackTextForCorrect(qid){
+  if (qid === 1) return "The line is horizontal, so the distance does not change.";
+  if (qid === 2) return "The curve becomes steeper, so speed is increasing with time.";
+  if (qid === 3) return "The steeper distance–time graph indicates a higher speed.";
+  if (qid === 4) return "The gradient decreases with time, so speed decreases.";
+  if (qid === 5) return "The gradient is constant, so speed is constant.";
+  if (qid === 6) return "The car moves at a constant speed at first, then speeds up as the graph becomes steeper.";
+  return "";
+}
+
+function feedbackTextForIncorrect(qid){
+  if (qid === 1) return "A horizontal distance–time line means the distance stays the same.";
+  if (qid === 2) return "If the gradient becomes steeper, the speed is increasing.";
+  if (qid === 3) return "Compare the gradients: the steeper line shows the higher speed.";
+  if (qid === 4) return "If the gradient becomes less steep, the speed is decreasing.";
+  if (qid === 5) return "A straight line with constant gradient means constant speed.";
+  if (qid === 6) return "Check whether the gradient increases or decreases after the straight-line section.";
+  return "Try again.";
+}
+
+function resetCurrentQuestion(){
+  hintBox.style.display = "none";
+  feedback.style.display = "none";
+  reflection.style.display = "none";
+  const q = currentQuestions[currentIndex];
+  if (q.layout === "sectionMatch"){
+    clearSectionMatch();
+  } else {
+    resetDropZoneToBank();
+    setZonePlaceholder();
+    clearCheckState();
+  }
+}
+
+function resetDropZoneToBank(){
+  const c = dropZone.querySelector(".card");
+  if (c) cardBank.appendChild(c);
+}
+
+function goNext(){
+  if (currentIndex < currentQuestions.length - 1){
+    loadQuestion(currentIndex + 1);
+  } else {
+    if (currentStage.id === 1){
+      promptText.innerHTML = `
+        <strong>Journal section complete.</strong><br/>
+        You have completed Stage 1 (Distance–Time Graphs).<br/>
+        <span style="color:#6B7280;font-size:12px;">Next, we will move to Stage 2 (Speed–Time Graphs) where the gradient represents acceleration.</span>
+      `;
+      graphArea.innerHTML = endCardStage1();
+      const startBtn = document.getElementById("startStage2Btn");
+      if (startBtn){
+        startBtn.addEventListener("click", () => {
+          dropZone.style.display = "";
+          checkBtn.disabled = false;
+          hintBtn.disabled = false;
+          resetBtn.disabled = false;
+          nextBtn.disabled = true;
+          loadStage(STAGES.stage2);
+        });
+      }
+      hintBox.style.display = "none";
+      feedback.style.display = "none";
+      reflection.style.display = "none";
+      dropZone.style.display = "none";
+      checkBtn.disabled = true;
+      hintBtn.disabled = true;
+      resetBtn.disabled = true;
+      nextBtn.disabled = true;
+      updateDots(true);
+      updateStatusText(true);
+    } else {
+      if (currentStage.id === 2){
+        const score = scoreState();
+        promptText.innerHTML = `
+          <strong>Journal section complete.</strong><br/>
+          You have completed Stage 2 (Speed–Time Graphs).<br/>
+          <span style="color:#6B7280;font-size:12px;">Next, begin Stage 3 (Section Match).</span>
+        `;
+        graphArea.innerHTML = endCardStage2(score.stars);
+        const startBtn = document.getElementById("startStage3Btn");
+        if (startBtn){
+          startBtn.addEventListener("click", () => {
+            dropZone.style.display = "";
+            checkBtn.disabled = false;
+            hintBtn.disabled = false;
+            resetBtn.disabled = false;
+            nextBtn.disabled = true;
+            loadStage(STAGES.stage3);
+          });
+        }
+        hintBox.style.display = "none";
+        feedback.style.display = "none";
+        reflection.style.display = "none";
+        dropZone.style.display = "none";
+        checkBtn.disabled = true;
+        hintBtn.disabled = true;
+        resetBtn.disabled = true;
+        nextBtn.disabled = true;
+        updateDots(true);
+        updateStatusText(true);
+      } else {
+        const score = scoreState();
+        promptText.innerHTML = `
+          <strong>Journal section complete.</strong><br/>
+          You have completed Stage 3 (Section Match).<br/>
+          <strong>Mission Completed!</strong><br/>
+          <span style="color:#6B7280;font-size:12px;">Total Stars earned: ${score.stars}</span>
+        `;
+        graphArea.innerHTML = endCardStage3(score.stars);
+        playSound(soundComplete);
+        hintBox.style.display = "none";
+        feedback.style.display = "none";
+        reflection.style.display = "none";
+        dropZone.style.display = "none";
+        checkBtn.disabled = true;
+        hintBtn.disabled = true;
+        resetBtn.disabled = true;
+        nextBtn.disabled = true;
+        updateDots(true);
+        updateStatusText(true);
+      }
+    }
+  }
+}
+
+function updateStatusText(isEnd=false){
+  const done = countDone();
+  statusText.textContent = isEnd ? `Progress: ${currentStage.total} / ${currentStage.total}` : `Progress: ${done} / ${currentStage.total}`;
+}
+
+function updateDots(forceAllDone=false){
+  const dots = Array.from(progressDotsEl.querySelectorAll(".dot"));
+  const done = forceAllDone
+    ? Array.from({length: currentStage.total}, () => true)
+    : Array.from({length: currentStage.total}, (_, i) => isQuestionMarkedDone(i));
+
+  dots.forEach(d => d.classList.remove("active"));
+  if (!forceAllDone && dots[currentIndex]){
+    dots[currentIndex].classList.add("active");
+  }
+  dots.forEach((d, i) => d.classList.toggle("done", done[i]));
+}
+
+function updateScoreUI({popStars=false, pulseStreak=false} = {}){
+  const score = scoreState();
+  starsCountEl.textContent = score.stars;
+  streakCountEl.textContent = score.streak;
+  starsCountEl.classList.add("stars");
+
+  if (popStars){
+    starsCountEl.classList.remove("popStar");
+    void starsCountEl.offsetWidth;
+    starsCountEl.classList.add("popStar");
+    setTimeout(() => starsCountEl.classList.remove("popStar"), 400);
+  }
+  if (pulseStreak){
+    streakCountEl.classList.remove("pulse");
+    void streakCountEl.offsetWidth;
+    streakCountEl.classList.add("pulse");
+    setTimeout(() => streakCountEl.classList.remove("pulse"), 320);
+  }
+}
+
+function playSound(audio){
+  if (!soundEnabled) return;
+  audio.currentTime = 0;
+  audio.play().catch(() => {});
+}
+
+function toggleHelperText(hide){
+  if (bankTip) bankTip.style.display = hide ? "none" : "block";
+}
+
+function configureSectionMatchBank(q){
+  bankTitleEl.textContent = "Options";
+  cardBank.classList.remove("graphOptions");
+  const sorted = [...q.options].sort((a, b) => a.label.localeCompare(b.label));
+  cardBank.innerHTML = sorted.map(o => `
+    <div class="card" draggable="true" data-id="${o.id}" tabindex="0">
+      ${escapeHtml(o.label)}
+    </div>
+  `).join("");
+  rebindDragEvents();
+  bindSectionDrops();
+}
+
+function bindSectionDrops(){
+  sectionDrops.forEach(zone => {
+    zone.addEventListener("dragover", (e) => {
+      e.preventDefault();
+      zone.classList.add("over");
+    });
+    zone.addEventListener("dragleave", () => zone.classList.remove("over"));
+    zone.addEventListener("drop", (e) => {
+      e.preventDefault();
+      zone.classList.remove("over");
+      const id = e.dataTransfer.getData("text/plain");
+      const card = document.querySelector(`.card[data-id="${cssEscape(id)}"]`);
+      if (!card) return;
+      placeCardIntoSection(zone, card);
+    });
+    zone.addEventListener("click", () => {
+      const c = zone.querySelector(".card");
+      if (!c) return;
+      cardBank.appendChild(c);
+      zone.classList.remove("correct","wrong");
+      zone.textContent = "Drop here";
+    });
+  });
+}
+
+function placeCardIntoSection(zone, card){
+  const existing = zone.querySelector(".card");
+  if (existing) cardBank.appendChild(existing);
+  zone.textContent = "";
+  zone.appendChild(card);
+  zone.classList.remove("correct","wrong","over");
+}
+
+function resetSectionMatch(){
+  sectionDrops.forEach(zone => {
+    const c = zone.querySelector(".card");
+    if (c) cardBank.appendChild(c);
+    zone.classList.remove("correct","wrong","over");
+    zone.textContent = "Drop here";
+  });
+}
+
+function clearSectionMatch(){
+  resetSectionMatch();
+  feedback.style.display = "none";
+  reflection.style.display = "none";
+  nextBtn.disabled = true;
+}
+
+function checkAnswerSectionMatch(q){
+  const wrongSections = [];
+  const correctSections = [];
+  let allPlaced = true;
+
+  sectionDrops.forEach(zone => {
+    const section = zone.dataset.section;
+    const card = zone.querySelector(".card");
+    if (!card){
+      allPlaced = false;
+      wrongSections.push(section);
+      zone.classList.add("wrong");
+      zone.classList.remove("correct");
+      zone.textContent = "Drop here";
+      return;
+    }
+    const isCorrect = card.dataset.id === q.acceptMap[section];
+    zone.classList.toggle("correct", isCorrect);
+    zone.classList.toggle("wrong", !isCorrect);
+    if (isCorrect) correctSections.push(section);
+    else wrongSections.push(section);
+  });
+
+  if (!allPlaced){
+    playSound(soundWrong);
+    showFeedback(false, "Place a card into each section first.");
+    nextBtn.disabled = true;
+    return;
+  }
+
+  if (wrongSections.length === 0){
+    playSound(soundCorrect);
+    if (!isQuestionMarkedDone(currentIndex)){
+      markQuestionDone(currentIndex);
+      const score = scoreState();
+      score.stars += 1;
+      score.streak += 1;
+      if (score.streak === 3 && !score.bonusGiven["3"]){
+        score.stars += 1;
+        score.bonusGiven["3"] = true;
+      }
+      if (score.streak === 5 && !score.bonusGiven["5"]){
+        score.stars += 2;
+        score.bonusGiven["5"] = true;
+      }
+      saveScoreState(score);
+      updateScoreUI({popStars:true, pulseStreak:true});
+      completed = countDone();
+    }
+    showFeedback(true, q.feedbackCorrect || "All sections matched correctly.");
+    reflection.style.display = "block";
+    nextBtn.disabled = false;
+  } else {
+    playSound(soundWrong);
+    const score = scoreState();
+    if (score.streak !== 0){
+      score.streak = 0;
+      saveScoreState(score);
+      updateScoreUI({pulseStreak:true});
+    }
+    const list = wrongSections.sort().join(" and ");
+    showFeedback(false, `Check sections: ${list} need another look.`);
+    nextBtn.disabled = true;
+  }
+
+  updateDots();
+  updateStatusText();
+}
+
+function isQuestionMarkedDone(index){
+  return stageState().done[index] === true;
+}
+function markQuestionDone(index){
+  const state = stageState();
+  state.done[index] = true;
+  saveStageState(state);
+}
+function countDone(){
+  return stageState().done.filter(Boolean).length;
+}
+
+/* ------- Stage state (done only, per stage) -------
+   Uses sessionStorage so it resets when tab closes.
+*/
+function stageState(){
+  const raw = sessionStorage.getItem(currentStage.key);
+  const blank = { done: Array.from({length: currentStage.total}, () => false) };
+  if (!raw) return blank;
+  try{
+    const parsed = JSON.parse(raw);
+    if (!parsed || !Array.isArray(parsed.done)) return blank;
+    if (parsed.done.length !== currentStage.total) return blank;
+    return parsed;
+  } catch {
+    return blank;
+  }
+}
+function saveStageState(state){
+  sessionStorage.setItem(currentStage.key, JSON.stringify(state));
+}
+
+/* ------- Global score state (shared across stages) ------- */
+function scoreState(){
+  const raw = sessionStorage.getItem("cml_global_score");
+  if (raw){
+    try{
+      const parsed = JSON.parse(raw);
+      if (parsed && typeof parsed.stars === "number" && typeof parsed.streak === "number"){
+        if (!parsed.bonusGiven || typeof parsed.bonusGiven !== "object"){
+          parsed.bonusGiven = {"3":false,"5":false};
+        } else {
+          if (parsed.bonusGiven["3"] !== true) parsed.bonusGiven["3"] = false;
+          if (parsed.bonusGiven["5"] !== true) parsed.bonusGiven["5"] = false;
+        }
+        return parsed;
+      }
+    } catch {}
+  }
+
+  // Fallback: migrate from stage 1 state if present
+  const stage1Raw = sessionStorage.getItem(STAGES.stage1.key);
+  if (stage1Raw){
+    try{
+      const parsed = JSON.parse(stage1Raw);
+      if (parsed && typeof parsed.stars === "number" && typeof parsed.streak === "number"){
+        const migrated = {
+          stars: parsed.stars,
+          streak: parsed.streak,
+          bonusGiven: parsed.bonusGiven || {"3":false,"5":false}
+        };
+        sessionStorage.setItem("cml_global_score", JSON.stringify(migrated));
+        return migrated;
+      }
+    } catch {}
+  }
+
+  return { stars: 0, streak: 0, bonusGiven: {"3": false, "5": false} };
+}
+function saveScoreState(state){
+  sessionStorage.setItem("cml_global_score", JSON.stringify(state));
+}
+
+/* ==========================================================
+   SVG Graph Builders
+   ========================================================== */
+
+function distanceTimeGraph({title, pathType, lineY}){
+  // Common axes for distance-time graph
+  // pathType:
+  //  - "horizontal"
+  //  - "straight_constant"
+  //  - "curve_steeper"
+  //  - "curve_less_steep"
+  //  - "increase_then_decrease"
+  const navy = "#0B1F3B";
+  let path = "";
+
+  if (pathType === "horizontal"){
+    const y = (typeof lineY === "number") ? lineY : 70;
+    path = `<line x1="35" y1="${y}" x2="205" y2="${y}" stroke="${navy}" stroke-width="4" />`;
+  } else if (pathType === "straight_constant"){
+    path = `<line x1="35" y1="135" x2="205" y2="35" stroke="${navy}" stroke-width="4" />`;
+  } else if (pathType === "curve_steeper"){
+    // Smooth concave-up curve from origin with continuously increasing gradient
+    path = `<polyline points="
+                  35,135
+                  48.6,134.3
+                  62.2,132.2
+                  75.8,128.7
+                  89.4,123.7
+                  103.0,117.4
+                  116.6,109.7
+                  130.2,100.5
+                  143.8,90.0
+                  157.4,78.2
+                  171.0,64.6
+                  184.6,49.8
+                  194.8,37.8
+                  199.9,31.5
+                  205,25"
+              fill="none" stroke="${navy}" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />`;
+  } else if (pathType === "curve_less_steep"){
+    // Concave-down polyline: gradient decreases continuously
+    path = `<polyline points="
+                  35,135
+                  50,120
+                  65,108
+                  80,99
+                  95,91
+                  110,84
+                  125,78
+                  140,73
+                  155,69
+                  170,66
+                  185,64
+                  205,62"
+              fill="none" stroke="${navy}" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />`;
+  } else if (pathType === "increase_then_decrease"){
+    // Gradient increases then decreases, distance always increases
+    path = `<polyline points="
+                  35,135
+                  50,132
+                  65,126
+                  80,117
+                  95,105
+                  110,90
+                  125,74
+                  140,60
+                  155,49
+                  170,41
+                  185,35
+                  205,31"
+              fill="none" stroke="${navy}" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />`;
+  }
+
+  return `
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+      <div style="font-weight:800;color:var(--navy);font-size:12px;">${escapeHtml(title)}</div>
+      <div style="color:var(--muted);font-size:12px;">Distance vs Time</div>
+    </div>
+    <svg viewBox="0 0 240 170" width="100%" role="img" aria-label="Distance-time graph">
+      <!-- axes -->
+      <line x1="35" y1="135" x2="220" y2="135" stroke="#111827" stroke-width="2"/>
+      <line x1="35" y1="135" x2="35" y2="25" stroke="#111827" stroke-width="2"/>
+
+      <!-- axis labels -->
+      <text x="120" y="162" font-size="12" fill="#6B7280">Time</text>
+      <text x="10" y="92" font-size="12" fill="#6B7280" transform="rotate(-90 12 92)">Distance</text>
+
+      <!-- motion line -->
+      ${path}
+    </svg>
+  `;
+}
+
+function speedTimeGraph({title, type, showTicks=false, xMax=6, yMax=12, xTicks=[], yTicks=[]}){
+  const navy = "#0B1F3B";
+  let path = "";
+
+  if (type === "constant_speed"){
+    path = `<line x1="35" y1="95" x2="205" y2="95" stroke="${navy}" stroke-width="4" stroke-linecap="round" />`;
+  } else if (type === "constant_acceleration"){
+    path = `<line x1="35" y1="135" x2="205" y2="55" stroke="${navy}" stroke-width="4" stroke-linecap="round" />`;
+  } else if (type === "constant_deceleration"){
+    path = `<line x1="35" y1="55" x2="205" y2="105" stroke="${navy}" stroke-width="4" stroke-linecap="round" />`;
+  } else if (type === "increasing_acceleration"){
+    path = `<polyline points="
+              35,135
+              53.9,133.7
+              72.8,129.8
+              91.7,123.3
+              110.6,114.3
+              129.4,102.6
+              148.3,88.3
+              167.2,71.5
+              186.1,52.0
+              205,30"
+            fill="none" stroke="#0B1F3B" stroke-width="4"
+            stroke-linecap="round" stroke-linejoin="round" />`;
+  } else if (type === "decreasing_acceleration"){
+    path = `<polyline points="
+              35,135
+              60,110
+              85,92
+              110,79
+              135,70
+              160,64
+              185,60
+              205,58"
+            fill="none" stroke="${navy}" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />`;
+  } else if (type === "increasing_deceleration"){
+    path = `<polyline points="
+              35,55
+              53.9,56.0
+              72.8,59.0
+              91.7,63.9
+              110.6,70.8
+              129.4,79.7
+              148.3,90.6
+              167.2,103.4
+              186.1,118.2
+              205,135"
+            fill="none" stroke="#0B1F3B" stroke-width="4"
+            stroke-linecap="round" stroke-linejoin="round" />`;
+  } else if (type === "area_triangle"){
+    const p1 = speedTimePoint(0, 0, xMax, yMax);
+    const p2 = speedTimePoint(4, 10, xMax, yMax);
+    path = `<polyline points="${p1} ${p2}"
+            fill="none" stroke="${navy}" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />`;
+  } else if (type === "area_trapezium"){
+    const p1 = speedTimePoint(0, 12, xMax, yMax);
+    const p2 = speedTimePoint(3, 12, xMax, yMax);
+    const p3 = speedTimePoint(6, 0, xMax, yMax);
+    path = `<polyline points="${p1} ${p2} ${p3}"
+            fill="none" stroke="${navy}" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />`;
+  }
+
+  const ticks = showTicks ? renderSpeedTimeTicks(xMax, yMax, xTicks, yTicks) : "";
+
+  return `
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+      <div style="font-weight:800;color:var(--navy);font-size:12px;">${escapeHtml(title)}</div>
+      <div style="color:var(--muted);font-size:12px;">Speed vs Time</div>
+    </div>
+    <svg viewBox="0 0 240 170" width="100%" role="img" aria-label="Speed-time graph">
+      <!-- axes -->
+      <line x1="35" y1="135" x2="220" y2="135" stroke="#111827" stroke-width="2"/>
+      <line x1="35" y1="135" x2="35" y2="25" stroke="#111827" stroke-width="2"/>
+
+      ${ticks}
+
+      <!-- axis labels -->
+      <text x="120" y="162" font-size="12" fill="#6B7280">Time</text>
+      <text x="10" y="92" font-size="12" fill="#6B7280" transform="rotate(-90 12 92)">Speed</text>
+
+      <!-- motion line -->
+      ${path}
+    </svg>
+  `;
+}
+
+function speedTimePoint(t, v, xMax, yMax){
+  const x = 35 + (t / xMax) * 185;
+  const y = 135 - (v / yMax) * 110;
+  return `${x.toFixed(1)},${y.toFixed(1)}`;
+}
+
+function renderSpeedTimeTicks(xMax, yMax, xTicks, yTicks){
+  const tickLen = 4;
+  let out = "";
+
+  xTicks.forEach(t => {
+    const x = 35 + (t / xMax) * 185;
+    out += `<line x1="${x}" y1="135" x2="${x}" y2="${135 + tickLen}" stroke="#111827" stroke-width="1"/>`;
+    out += `<text x="${x}" y="${135 + tickLen + 12}" font-size="10" fill="#6B7280" text-anchor="middle">${t}</text>`;
+  });
+
+  yTicks.forEach(v => {
+    const y = 135 - (v / yMax) * 110;
+    out += `<line x1="35" y1="${y}" x2="${35 - tickLen}" y2="${y}" stroke="#111827" stroke-width="1"/>`;
+    out += `<text x="${35 - tickLen - 2}" y="${y + 3}" font-size="10" fill="#6B7280" text-anchor="end">${v}</text>`;
+  });
+
+  return out;
+}
+
+function sectionMatchGraphDT1(){
+  return `
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+      <div style="font-weight:800;color:var(--navy);font-size:12px;">Distance–Time</div>
+      <div style="color:var(--muted);font-size:12px;">Sections A–D</div>
+    </div>
+    <svg viewBox="0 0 240 170" width="100%" role="img" aria-label="Distance-time section graph">
+      <line x1="35" y1="135" x2="220" y2="135" stroke="#111827" stroke-width="2"/>
+      <line x1="35" y1="135" x2="35" y2="25" stroke="#111827" stroke-width="2"/>
+      <text x="120" y="162" font-size="12" fill="#6B7280">Time</text>
+      <text x="10" y="92" font-size="12" fill="#6B7280" transform="rotate(-90 12 92)">Distance</text>
+
+      <!-- section dividers -->
+      <line x1="81.25" y1="135" x2="81.25" y2="25" stroke="#E5E7EB" stroke-width="1"/>
+      <line x1="127.5" y1="135" x2="127.5" y2="25" stroke="#E5E7EB" stroke-width="1"/>
+      <line x1="173.75" y1="135" x2="173.75" y2="25" stroke="#E5E7EB" stroke-width="1"/>
+      <text x="58" y="38" font-size="12" fill="#6B7280">A</text>
+      <text x="104" y="38" font-size="12" fill="#6B7280">B</text>
+      <text x="150" y="38" font-size="12" fill="#6B7280">C</text>
+      <text x="196" y="38" font-size="12" fill="#6B7280">D</text>
+
+      <!-- A: stationary -->
+      <polyline points="35,105 81.25,105"
+        fill="none" stroke="#0B1F3B" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+      <!-- B: constant speed -->
+      <polyline points="81.25,105 127.5,75"
+        fill="none" stroke="#0B1F3B" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+      <!-- C: increasing speed -->
+      <polyline points="
+        127.5,75
+        140,72
+        152,66
+        163,58
+        173.75,48"
+        fill="none" stroke="#0B1F3B" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+      <!-- D: decreasing speed -->
+      <polyline points="
+        173.75,48
+        184,43
+        195,39
+        206,35
+        220,31"
+        fill="none" stroke="#0B1F3B" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  `;
+}
+
+function sectionMatchGraphST2(){
+  return `
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+      <div style="font-weight:800;color:var(--navy);font-size:12px;">Speed–Time</div>
+      <div style="color:var(--muted);font-size:12px;">Sections A–D</div>
+    </div>
+    <svg viewBox="0 0 240 170" width="100%" role="img" aria-label="Speed-time section graph">
+      <line x1="35" y1="135" x2="220" y2="135" stroke="#111827" stroke-width="2"/>
+      <line x1="35" y1="135" x2="35" y2="25" stroke="#111827" stroke-width="2"/>
+      <text x="120" y="162" font-size="12" fill="#6B7280">Time</text>
+      <text x="10" y="92" font-size="12" fill="#6B7280" transform="rotate(-90 12 92)">Speed</text>
+
+      <!-- section dividers -->
+      <line x1="81.25" y1="135" x2="81.25" y2="25" stroke="#E5E7EB" stroke-width="1"/>
+      <line x1="127.5" y1="135" x2="127.5" y2="25" stroke="#E5E7EB" stroke-width="1"/>
+      <line x1="173.75" y1="135" x2="173.75" y2="25" stroke="#E5E7EB" stroke-width="1"/>
+      <text x="58" y="38" font-size="12" fill="#6B7280">A</text>
+      <text x="104" y="38" font-size="12" fill="#6B7280">B</text>
+      <text x="150" y="38" font-size="12" fill="#6B7280">C</text>
+      <text x="196" y="38" font-size="12" fill="#6B7280">D</text>
+
+      <!-- A: constant acceleration -->
+      <polyline points="35,120 81.25,85"
+        fill="none" stroke="#0B1F3B" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+      <!-- B: constant speed -->
+      <polyline points="81.25,85 127.5,85"
+        fill="none" stroke="#0B1F3B" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+      <!-- C: decreasing acceleration (rising but flattening) -->
+      <polyline points="
+        127.5,85
+        142,80
+        156,77
+        166,75.5
+        173.75,75"
+        fill="none" stroke="#0B1F3B" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+      <!-- D: constant deceleration -->
+      <polyline points="173.75,75 220,100"
+        fill="none" stroke="#0B1F3B" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  `;
+}
+
+function sectionMatchGraphST3(){
+  return `
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+      <div style="font-weight:800;color:var(--navy);font-size:12px;">Speed–Time</div>
+      <div style="color:var(--muted);font-size:12px;">Sections A–D</div>
+    </div>
+    <svg viewBox="0 0 240 170" width="100%" role="img" aria-label="Speed-time section graph story">
+      <line x1="35" y1="135" x2="220" y2="135" stroke="#111827" stroke-width="2"/>
+      <line x1="35" y1="135" x2="35" y2="25" stroke="#111827" stroke-width="2"/>
+      <text x="120" y="162" font-size="12" fill="#6B7280">Time</text>
+      <text x="10" y="92" font-size="12" fill="#6B7280" transform="rotate(-90 12 92)">Speed</text>
+
+      <!-- section dividers -->
+      <line x1="81.25" y1="135" x2="81.25" y2="25" stroke="#E5E7EB" stroke-width="1"/>
+      <line x1="127.5" y1="135" x2="127.5" y2="25" stroke="#E5E7EB" stroke-width="1"/>
+      <line x1="173.75" y1="135" x2="173.75" y2="25" stroke="#E5E7EB" stroke-width="1"/>
+      <text x="58" y="38" font-size="12" fill="#6B7280">A</text>
+      <text x="104" y="38" font-size="12" fill="#6B7280">B</text>
+      <text x="150" y="38" font-size="12" fill="#6B7280">C</text>
+      <text x="196" y="38" font-size="12" fill="#6B7280">D</text>
+
+      <!-- A: accelerating from rest -->
+      <polyline points="35,135 81.25,95"
+        fill="none" stroke="#0B1F3B" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+      <!-- B: constant speed -->
+      <polyline points="81.25,95 127.5,95"
+        fill="none" stroke="#0B1F3B" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+      <!-- C: decelerating -->
+      <polyline points="127.5,95 173.75,135"
+        fill="none" stroke="#0B1F3B" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+      <!-- D: stationary -->
+      <polyline points="173.75,135 220,135"
+        fill="none" stroke="#0B1F3B" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  `;
+}
+
+function compareDistanceTimeGraphs(){
+  // Two graphs A and B with B steeper => B faster
+  return `
+    <div class="compareGraphs" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+      <div style="border:1px solid var(--line);border-radius:12px;padding:10px;">
+        <div style="font-weight:800;color:var(--navy);font-size:12px;margin-bottom:6px;">Object A</div>
+        ${distanceTimeGraphMini("A")}
+      </div>
+      <div style="border:1px solid var(--line);border-radius:12px;padding:10px;">
+        <div style="font-weight:800;color:var(--navy);font-size:12px;margin-bottom:6px;">Object B</div>
+        ${distanceTimeGraphMini("B")}
+      </div>
+    </div>
+  `;
+}
+
+function graphOptionSVG(which){
+  const navy = "#0B1F3B";
+  let path = "";
+
+  if (which === "A"){
+    // Constant speed throughout
+    path = `<polyline points="35,135 205,55"
+              fill="none" stroke="${navy}" stroke-width="4"
+              stroke-linecap="round" stroke-linejoin="round" />`;
+  } else if (which === "B"){
+    // Speeds up then constant speed (wrong order)
+    path = `<polyline points="
+              35,135
+              55,134
+              75,130
+              95,123
+              115,112
+              130,98
+              145,82
+              205,70"
+            fill="none" stroke="${navy}" stroke-width="4"
+            stroke-linecap="round" stroke-linejoin="round" />`;
+  } else if (which === "C"){
+    // Constant speed then slowing down (gradient decreases)
+    path = `<polyline points="
+              35,135
+              75,112
+              105,95
+              130,84
+              150,77
+              170,72
+              190,69
+              205,67"
+            fill="none" stroke="${navy}" stroke-width="4"
+            stroke-linecap="round" stroke-linejoin="round" />`;
+  } else if (which === "D"){
+    // Constant speed then speeding up (correct)
+    path = `
+      <polyline
+        points="35,135 120,90"
+        fill="none"
+        stroke="${navy}"
+        stroke-width="4"
+        stroke-linecap="round"
+        stroke-linejoin="round"/>
+      <polyline
+        points="
+          120,90
+          135,84
+          150,75
+          165,62
+          180,45
+          192,32
+          205,20"
+        fill="none"
+        stroke="${navy}"
+        stroke-width="4"
+        stroke-linecap="round"
+        stroke-linejoin="round"/>
+    `;
+  }
+
+  return `
+    <svg viewBox="0 0 220 150" width="100%" role="img" aria-label="Distance-time graph option ${which}">
+      <line x1="35" y1="135" x2="220" y2="135" stroke="#111827" stroke-width="2"/>
+      <line x1="35" y1="135" x2="35" y2="25" stroke="#111827" stroke-width="2"/>
+      <text x="105" y="146" font-size="11" fill="#6B7280">Time</text>
+      <text x="5" y="80" font-size="11" fill="#6B7280" transform="rotate(-90 10 80)">Distance</text>
+      ${path}
+    </svg>
+  `;
+}
+
+function distanceTimeGraphMini(which){
+  const navy = "#0B1F3B";
+  // A: less steep; B: steeper
+  const line = (which === "A")
+    ? `<line x1="28" y1="120" x2="185" y2="55" stroke="${navy}" stroke-width="4" />`
+    : `<line x1="28" y1="125" x2="155" y2="35" stroke="${navy}" stroke-width="4" />`;
+
+  return `
+    <svg viewBox="0 0 220 150" width="100%" role="img" aria-label="Distance-time graph comparison">
+      <line x1="28" y1="125" x2="200" y2="125" stroke="#111827" stroke-width="2"/>
+      <line x1="28" y1="125" x2="28" y2="22" stroke="#111827" stroke-width="2"/>
+      <text x="105" y="146" font-size="11" fill="#6B7280">Time</text>
+      <text x="5" y="80" font-size="11" fill="#6B7280" transform="rotate(-90 10 80)">Distance</text>
+      ${line}
+    </svg>
+  `;
+}
+
+function endCardStage1(){
+  return `
+    <div style="padding:18px;border:1px solid var(--line);border-radius:12px;background:#fff;">
+      <div style="font-weight:900;color:var(--navy);font-size:14px;">Stage 1 complete</div>
+      <div style="margin-top:6px;color:var(--muted);font-size:14px;line-height:1.45;">
+        You have completed Stage 1 (Distance–Time Graphs).<br/>
+        Next, we will move to Stage 2 (Speed–Time Graphs) where the gradient represents acceleration.
+      </div>
+      <div style="margin-top:10px;">
+        <button class="primary" id="startStage2Btn">Start Stage 2</button>
+      </div>
+    </div>
+  `;
+}
+
+function endCardStage2(totalStars){
+  return `
+    <div style="padding:18px;border:1px solid var(--line);border-radius:12px;background:#fff;">
+      <div style="font-weight:900;color:var(--navy);font-size:14px;">Stage 2 complete</div>
+      <div style="margin-top:6px;color:var(--muted);font-size:14px;line-height:1.45;">
+        You have completed Stage 2 (Speed–Time Graphs).<br/>
+        Total Stars earned: ${totalStars}
+      </div>
+      <div style="margin-top:10px;">
+        <button class="primary" id="startStage3Btn">Start Stage 3</button>
+      </div>
+    </div>
+  `;
+}
+
+function endCardStage3(totalStars){
+  return `
+    <div style="padding:18px;border:1px solid var(--line);border-radius:12px;background:#fff;">
+      <div style="font-weight:900;color:var(--navy);font-size:14px;">Stage 3 complete</div>
+      <div style="margin-top:6px;color:var(--muted);font-size:14px;line-height:1.45;">
+        You have completed Stage 3 (Section Match).<br/>
+        <strong>Mission Completed!</strong><br/>
+        Total Stars earned: ${totalStars}
+      </div>
+    </div>
+  `;
+}
+
+/* ==========================================================
+   Small utilities
+   ========================================================== */
+
+function escapeHtml(str){
+  return String(str)
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;")
+    .replaceAll("'","&#039;");
+}
+
+// CSS escape for dataset lookup safety
+function cssEscape(value){
+  // basic escape for quotes/brackets etc
+  return String(value).replace(/["\\#.;?+*~':!^$[\]()=>|/@]/g, "\\$&");
+}
+</script>
+</body>
+</html>
